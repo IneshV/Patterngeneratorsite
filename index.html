@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Custom Pattern Producer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Custom Pattern Producer</h1>
+    </header>
+    <main>
+        <div class="content-wrapper">
+            <section id="measurement-section">
+                <h2>Enter Your Measurements</h2>
+                <form id="measurement-form">
+                    <label for="chest">Chest (inches):</label>
+                    <input type="number" id="chest" placeholder="Enter chest measurement" value="3">
+                    <br>
+                    <label for="waist">Waist (inches):</label>
+                    <input type="number" id="waist" placeholder="Enter waist measurement" value="2">
+                    <br>
+                    <label for="back-waist">Back Waist (or Garment Length) (inches):</label>
+                    <input type="number" id="back-waist" placeholder="Enter back waist measurement" value="4">
+                    <br>
+                    <label for="color-selector">Select Color:</label>
+                    <select id="color-selector">
+                        <option value="3498db">Blue</option>
+                        <option value="e74c3c">Red</option>
+                        <option value="27ae60">Green</option>
+                        <option value="f1c40f">Yellow</option>
+                        <option value="8e44ad">Purple</option>
+                        <option value="d35400">Orange</option>
+                        <option value="c0392b">Maroon</option>
+                        <option value="34495e">Navy</option>
+                        <option value="2ecc71">Emerald</option>
+                        <option value="e67e22">Brown</option>
+                    </select>
+                    <br>
+                    <button type="button" id="submit-measurements">Update 3D Object</button>
+                </form>
+            </section>
+        </div>
+        <section id="threejs-container"></section>
+    </main>
+    <footer>
+        <p>Developed by Wesleyan Soft-Robotics Lab</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
