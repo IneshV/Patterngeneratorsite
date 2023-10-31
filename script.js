@@ -47,9 +47,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const initialWaist = 2;
     const initialBackWaist = 4;
 
-    document.getElementById("chest").value = initialChest;
-    document.getElementById("waist").value = initialWaist;
-    document.getElementById("back-waist").value = initialBackWaist;
+    const chestInput = document.getElementById("chest");
+    chestInput.value = initialChest;
+    chestInput.addEventListener("input", function () {
+        const chest = parseFloat(chestInput.value) || 0;
+        updateTruncatedCone(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
+    });
+
+    const waistInput = document.getElementById("waist");
+    waistInput.value = initialWaist;
+    waistInput.addEventListener("input", function () {
+        const waist = parseFloat(waistInput.value) || 0;
+        updateTruncatedCone(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
+    });
+
+    const backWaistInput = document.getElementById("back-waist");
+    backWaistInput.value = initialBackWaist;
+    backWaistInput.addEventListener("input", function () {
+        const backWaist = parseFloat(backWaistInput.value) || 0;
+        updateTruncatedCone(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
+    });
+    
     updateTruncatedCone(initialChest, initialWaist, initialBackWaist);
 
     colorSelector.addEventListener("change", function () {
@@ -57,13 +75,21 @@ document.addEventListener("DOMContentLoaded", function () {
         material.color.set(selectedColor);
     });
 
-    const submitButton = document.getElementById("submit-measurements");
+    const downloadPatternButton = document.getElementById("download-pattern");
 
-    submitButton.addEventListener("click", function () {
-        const chest = parseFloat(document.getElementById("chest").value) || 0;
-        const waist = parseFloat(document.getElementById("waist").value) || 0;
-        const backWaist = parseFloat(document.getElementById("back-waist").value) || 0;
-
-        updateTruncatedCone(chest, waist, backWaist);
+    downloadPatternButton.addEventListener("click", function () {
+        const chest = parseFloat(chestInput.value) || 0;
+        const waist = parseFloat(waistInput.value) || 0;
+        const backWaist = parseFloat(backWaistInput.value) || 0;
+        
+        const patternText = `Measurement Order: Chest - ${chest}, Waist - ${waist}, Back Waist - ${backWaist}`;
+        const blob = new Blob([patternText], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pattern.txt';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
     });
 });
