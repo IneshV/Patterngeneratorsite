@@ -68,6 +68,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add the rectangle to the scene
     scene.add(rectangle);
+    const rectWireframeGeometry = new THREE.EdgesGeometry(rectangleGeometry);
+
+    // Create a material for the rectangle wireframe with a black color
+    const rectWireframeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+    // Create a line segments object for the rectangle wireframe using the geometry and material
+    const rectWireframe = new THREE.LineSegments(rectWireframeGeometry, rectWireframeMaterial);
+    rectWireframe.position.copy(rectangle.position);
+    rectWireframe.rotation.copy(rectangle.rotation);
+
+    // Add the rectangle wireframe to the scene
+    scene.add(rectWireframe);
 
     // Set the initial camera position
     camera.position.z = 5;
@@ -110,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const bottomRadius = waist / 2;
         const height = backWaist;
 
-        const newrectangleGeometry = new THREE.PlaneGeometry((chest+waist) / 8, Math.sqrt(Math.pow(backWaist, 2) + Math.pow(chest - waist, 2)));
+        const newrectangleGeometry = new THREE.PlaneGeometry((chest+waist) / 8, Math.sqrt(Math.pow(backWaist, 2) + Math.pow((chest - waist)/2, 2)));
 
         rectangle.geometry.dispose();
         rectangle.geometry = newrectangleGeometry;
@@ -118,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         // Calculate the new position of the rectangle along the Z-axis
-        const rectangleZPosition = bottomRadius;
+        const rectangleZPosition = (topRadius+ bottomRadius) / 2;
 
         // Calculate the x value of the rectangle based on the half of its width
         const rectangleXPosition = rectangle.geometry.parameters.width / 2;
@@ -132,6 +144,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Set the rotation of the rectangle
         rectangle.rotation.x = angle;
+
+        const newRectWireframeGeometry = new THREE.EdgesGeometry(newrectangleGeometry);
+
+        // Dispose of the old rectangle wireframe geometry and set the new wireframe geometry
+        rectWireframe.geometry.dispose();
+        rectWireframe.geometry = newRectWireframeGeometry;
+        rectWireframe.position.copy(rectangle.position);
+        rectWireframe.rotation.copy(rectangle.rotation);
+    
     }
 
     // Initial measurement values
