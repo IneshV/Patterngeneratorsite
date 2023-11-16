@@ -110,8 +110,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const bottomRadius = waist / 2;
         const height = backWaist;
 
+        const newrectangleGeometry = new THREE.PlaneGeometry((chest+waist) / 8, Math.sqrt(Math.pow(backWaist, 2) + Math.pow(chest - waist, 2)));
+
+        rectangle.geometry.dispose();
+        rectangle.geometry = newrectangleGeometry;
+
+
+
         // Calculate the new position of the rectangle along the Z-axis
-        const rectangleZPosition = height / 2;
+        const rectangleZPosition = bottomRadius;
 
         // Calculate the x value of the rectangle based on the half of its width
         const rectangleXPosition = rectangle.geometry.parameters.width / 2;
@@ -155,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
     waistInput.addEventListener("input", function () {
         // Get the updated waist measurement from the input field
         const waist = parseFloat(waistInput.value) || 0;
+        
         // Call the updateTruncatedCone function with the updated measurements
         updateTruncatedCone(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
 
