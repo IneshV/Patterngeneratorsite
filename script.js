@@ -3,6 +3,46 @@ document.addEventListener("DOMContentLoaded", function () {
     // Create a new Three.js scene
     const scene = new THREE.Scene();
 
+    const canvas = document.getElementById("trapezoid-canvas");
+    const context = canvas.getContext("2d");
+
+
+    function drawSymmetricalTrapezoid(chest, waist, garheight) {
+        const topBase = chest; // Chest (inches)
+        const bottomBase = waist; // Waist (inches)
+        const height = garheight; // Garment height (inches)
+    
+        const halfTopWidth = topBase * 5; // Scale for better visibility
+        const halfBottomWidth = bottomBase * 5; // Scale for better visibility
+    
+        const x1 = (canvas.width - halfTopWidth) / 2;
+        const x2 = (canvas.width + halfTopWidth) / 2;
+        const x3 = (canvas.width - halfBottomWidth) / 2;
+        const x4 = (canvas.width + halfBottomWidth) / 2;
+    
+        const y1 = 0;
+        const y2 = 0;
+        const y3 = height * 10; // Scale for better visibility
+        const y4 = height * 10; // Scale for better visibility
+    
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        scale = 10
+    
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.lineTo(x4, y3);
+        context.lineTo(x3, y4);
+        context.closePath();
+        const colorSelector = document.getElementById("color-selector");
+        const selectedColor = colorSelector.options[colorSelector.selectedIndex].value; // Get the selected color value
+    
+        context.fillStyle = "#" + selectedColor; // Set the fill color based on the selected color
+        context.fill();
+        }
+    
+
     // Create a perspective camera with a 75-degree field of view and an aspect ratio of 1
     const camera = new THREE.PerspectiveCamera(75, 1);
 
@@ -28,6 +68,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Create a cylinder geometry for the truncated cone
     const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32, 1);
 
+    drawSymmetricalTrapezoid(1, 1, 1);
+
+
     // Create a mesh (3D object) for the truncated cone using the material and geometry
     const truncatedCone = new THREE.Mesh(cylinderGeometry, material);
 
@@ -49,14 +92,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Create a geometry for the rectangle
     const rectangleGeometry = new THREE.PlaneGeometry(2, 4);
 
-    // Create a material for the rectangle with the same color as the cylinder
-    const rectangleMaterial = new THREE.MeshBasicMaterial({ color: material.color });
 
     // Create a mesh for the rectangle using the geometry and material
-    const rectangle = new THREE.Mesh(rectangleGeometry, rectangleMaterial);
+    const rectangle = new THREE.Mesh(rectangleGeometry, material);
 
     // Position the rectangle in front of the cylinder and align its left side with the front side of the cylinder
-    const rectangleZPosition = truncatedCone.position.z + truncatedCone.geometry.parameters.height; // Adjust the Z position to be slightly in front of the cone
     rectangle.position.set(1, 0, 1);
 
     // Calculate the angle of rotation based on the slope of the cylinder
@@ -177,6 +217,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Call the updateRectangle function with the updated measurements
         updateRectangle(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
+        drawSymmetricalTrapezoid(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
+
     });
 
     // Event listener for waist input
@@ -189,6 +231,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Call the updateRectangle function with the updated measurements
         updateRectangle(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
+        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
+
     });
 
     // Event listener for backWaist input
@@ -200,17 +244,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Call the updateRectangle function with the updated measurements
         updateRectangle(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
+        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
+
     });
 
     // Update the truncated cone and rectangle with the initial measurements
     updateTruncatedCone(initialChest, initialWaist, initialBackWaist);
     updateRectangle(initialChest, initialWaist, initialBackWaist);
 
+    drawSymmetricalTrapezoid(initialChest, initialWaist, initialBackWaist);
+
     // Event listener for color selector
     colorSelector.addEventListener("change", function () {
         // Get the selected color value from the color selector and set it as the material color
         const selectedColor = parseInt(colorSelector.value, 16);
         material.color.set(selectedColor);
+        
+        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
+
     });
 
     // Get the "download-pattern" button
@@ -243,4 +294,3 @@ document.addEventListener("DOMContentLoaded", function () {
         window.URL.revokeObjectURL(url);
     });
 });
-
