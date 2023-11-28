@@ -6,11 +6,52 @@ document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("trapezoid-canvas");
     const context = canvas.getContext("2d");
 
+    const circleContainer = document.querySelector('.circle-container');
+    const blackCircle = document.getElementById('black-circle');
+
+    // Calculate the offset of the circle container relative to the viewport
+    const containerRect = circleContainer.getBoundingClientRect();
+    const containerX = containerRect.left + window.scrollX;
+    const containerY = containerRect.top + window.scrollY;
+
+    circleContainer.addEventListener('click', function (event) {
+        const clickX = event.clientX - containerX;
+        const clickY = event.clientY - containerY;
+
+        const centerX = blackCircle.offsetWidth / 2;
+        const centerY = blackCircle.offsetHeight / 2;
+        const radius = blackCircle.offsetWidth / 2;
+
+        // Calculate the angle between the center of the circle and the click point
+        const angle = Math.atan2(clickY - centerY, clickX - centerX);
+
+        // Calculate the coordinates of the point on the perimeter
+        const perimeterX = centerX + radius * Math.cos(angle);
+        const perimeterY = centerY + radius * Math.sin(angle);
+
+        if (event.target.classList.contains('red-dot')) {
+            removeRedDot(event.target);
+        } else {
+            createRedDot(perimeterX, perimeterY);
+        }
+    });
+
+    function createRedDot(x, y) {
+        const redDot = document.createElement('div');
+        redDot.className = 'red-dot';
+        redDot.style.left = x-5  + 'px';
+        redDot.style.top = y-5 + 'px';
+        circleContainer.appendChild(redDot);
+    }
+
+    function removeRedDot(redDot) {
+        circleContainer.removeChild(redDot);
+    }
 
     function drawSymmetricalTrapezoid(chest, waist, garheight) {
-        const topBase = chest; // Chest (inches)
-        const bottomBase = waist; // Waist (inches)
-        const height = garheight; // Garment height (inches)
+        const topBase = chest/12; // Chest (inches)
+        const bottomBase = waist/12; // Waist (inches)
+        const height = garheight/10; // Garment height (inches)
     
         const halfTopWidth = topBase * 5; // Scale for better visibility
         const halfBottomWidth = bottomBase * 5; // Scale for better visibility
@@ -139,9 +180,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to update the truncated cone based on measurements
     function updateTruncatedCone(chest, waist, backWaist) {
-        const topRadius = chest / 2;
-        const bottomRadius = waist / 2;
-        const height = backWaist;
+        const topRadius = chest / 24;
+        const bottomRadius = waist / 24;
+        const height = backWaist/10;
 
         // Create a new geometry for the truncated cone
         const newGeometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, 32, 1);
@@ -158,11 +199,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to update the rectangle based on measurements
     function updateRectangle(chest, waist, backWaist) {
         // Calculate the new position and rotation of the rectangle based on the measurements
-        const topRadius = chest / 2;
-        const bottomRadius = waist / 2;
-        const height = backWaist;
+        const topRadius = chest / 24;
+        const bottomRadius = waist / 24;
+        const height = backWaist / 10;
 
-        const newrectangleGeometry = new THREE.PlaneGeometry((chest+waist) / 8, Math.sqrt(Math.pow(backWaist, 2) + Math.pow((chest - waist)/2, 2)));
+        const chest2 = chest / 12;
+        const waist2 = waist / 12;
+
+
+        const newrectangleGeometry = new THREE.PlaneGeometry((chest2+waist2) / 8, Math.sqrt(Math.pow(height, 2) + Math.pow((chest2 - waist2)/2, 2)));
 
         rectangle.geometry.dispose();
         rectangle.geometry = newrectangleGeometry;
@@ -196,9 +241,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Initial measurement values
-    const initialChest = 3;
-    const initialWaist = 2;
-    const initialBackWaist = 4;
+    const initialChest = 36;
+    const initialWaist = 36;
+    const initialBackWaist = 30;
 
     // Get input elements for chest, waist, and backWaist and set their initial values
     const chestInput = document.getElementById("chest");
@@ -273,10 +318,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const chest = parseFloat(chestInput.value) || 0;
         const waist = parseFloat(waistInput.value) || 0;
         const backWaist = parseFloat(backWaistInput.value) || 0;
-
-        // Create a text pattern with the measurement values
-        const patternText = `Measurement Order: Chest - ${chest}, Waist - ${waist}, Back Waist - ${backWaist}`;
-
+        const colorSelector = document.getElementById("color-selector");
+        const selectedColor = colorSelector.options[colorSelector.selectedIndex].value;
+    
+        // Create a text pattern with the measurement values and the selected color
+        const patternText = `Measurement Order: Chest - ${chest}, Waist - ${waist}, Back Waist - ${backWaist}, Color - #${selectedColor}`;
+    
         // Create a Blob containing the text pattern as a text/plain file
         const blob = new Blob([patternText], { type: 'text/plain' });
 
