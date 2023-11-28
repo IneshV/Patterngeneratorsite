@@ -15,38 +15,43 @@
         <div class="content-wrapper">
             <section id="measurement-section">
                 <h2>Enter Your Measurements</h2>
-                <form id="measurement-form">
-                    <label for="chest">Chest (inches):</label>
-                    <input type="number" id="chest" placeholder="Enter chest measurement" value="3">
-                    <br>
-                    <label for "waist">Waist (inches):</label>
-                    <input type="number" id="waist" placeholder="Enter waist measurement" value="2">
-                    <br>
-                    <label for="back-waist">Back Waist (or Garment Length) (inches):</label>
-                    <input type="number" id="back-waist" placeholder="Enter back waist measurement" value="4">
-                    <br>
-                    <label for="color-selector">Select Color:</label>
-                    <select id="color-selector">
-                        <option value="3498db">Blue</option>
-                        <option value="e74c3c">Red</option>
-                        <option value="27ae60">Green</option>
-                        <option value="f1c40f">Yellow</option>
-                        <option value="8e44ad">Purple</option>
-                        <option value="d35400">Orange</option>
-                        <option value="c0392b">Maroon</option>
-                        <option value="34495e">Navy</option>
-                        <option value="2ecc71">Emerald</option>
-                        <option value="e67e22">Brown</option>
-                    </select>
-                    <br>
-                    <button type="button" id="download-pattern">Download Pattern</button>
-                </form>
+                <div class="measurement-container"> <!-- Added a div container -->
+                    <form id="measurement-form">
+                        <label for="chest">Chest (inches):</label>
+                        <input type="number" id="chest" placeholder="Enter chest measurement" value="36">
+                        <br>
+                        <label for "waist">Waist (inches):</label>
+                        <input type="number" id="waist" placeholder="Enter waist measurement" value="36">
+                        <br>
+                        <label for="back-waist">height (inches):</label>
+                        <input type="number" id="back-waist" placeholder="Enter back waist measurement" value="30">
+                        <br>
+                        <label for="color-selector">Select Color:</label>
+                        <select id="color-selector">
+                            <option value="3498db">Blue</option>
+                            <option value="e74c3c">Red</option>
+                            <option value="27ae60">Green</option>
+                            <option value="f1c40f">Yellow</option>
+                            <option value="8e44ad">Purple</option>
+                            <option value="d35400">Orange</option>
+                            <option value="c0392b">Maroon</option>
+                            <option value="34495e">Navy</option>
+                            <option value="2ecc71">Emerald</option>
+                            <option value="e67e22">Brown</option>
+                        </select>
+                            <br>
+                        <button type="button" id="download-pattern">Download Pattern</button>
+                    </form>
+
+                    <!-- Circle container is now inside the measurement container -->
+                    <div class="circle-container">
+                        <div id="black-circle" class="black-circle"></div>
+                    </div>
+                </div>
             </section>
         </div>
-            <section id="threejs-container"></section>
-            <canvas id="trapezoid-canvas" width="500" height="500">
-            </canvas>
-
+        <section id="threejs-container"></section>
+        <canvas id="trapezoid-canvas" width="500" height="500"></canvas>
     </main>
     <footer>
         <p>Developed by Inesh Vytheswaran</p>
