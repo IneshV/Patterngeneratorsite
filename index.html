@@ -17,15 +17,36 @@
                 <h2>Enter Your Measurements</h2>
                 <div class="measurement-container"> <!-- Added a div container -->
                     <form id="measurement-form">
-                        <label for="chest">Chest (inches):</label>
-                        <input type="number" id="chest" placeholder="Enter chest measurement" value="36">
-                        <br>
-                        <label for "waist">Waist (inches):</label>
-                        <input type="number" id="waist" placeholder="Enter waist measurement" value="36">
-                        <br>
-                        <label for="back-waist">height (inches):</label>
-                        <input type="number" id="back-waist" placeholder="Enter back waist measurement" value="30">
-                        <br>
+                        <!-- Add a top-half checkbox -->
+                        <label for="top-half-checkbox">Include Top Half</label>
+                        <input type="checkbox" id="top-half-checkbox" checked>
+
+                        <!-- Section for top-half measurements (initially visible) -->
+                        <section id="top-half-section">
+                            <label for="top-circumference">Top Circumference (inches):</label>
+                            <input type="number" id="top-circumference" placeholder="Enter top circumference" value="36">
+                            <br>
+                            <label for="top-height">Top Height (inches):</label>
+                            <input type="number" id="top-height" placeholder="Enter top height" value="20">
+                            <br>
+                        </section>
+                        <label for="natural-waist">Natural Waist (inches):</label>
+                        <input type="number" id="natural-waist" placeholder="Enter natural waist" value="30">
+
+                        <!-- Add a bottom-half checkbox (initially unchecked) -->
+                        <label for="bottom-half-checkbox">Include Bottom Half</label>
+                        <input type="checkbox" id="bottom-half-checkbox">
+
+                        <!-- Section for bottom-half measurements (initially hidden) -->
+                        <section id="bottom-half-section" style="display: none;">
+                            <label for="bottom-circumference">Bottom Circumference (inches):</label>
+                            <input type="number" id="bottom-circumference" placeholder="Enter bottom circumference" value = "36">
+                            <br>
+                            <label for="bottom-height">Bottom Height (inches):</label>
+                            <input type="number" id="bottom-height" placeholder="Enter bottom height" value = "20">
+                        </section>
+
+
                         <label for="color-selector">Select Color:</label>
                         <select id="color-selector">
                             <option value="3498db">Blue</option>
@@ -50,8 +71,7 @@
                 </div>
             </section>
         </div>
-        <section id="threejs-container"></section>
-        <canvas id="trapezoid-canvas" width="500" height="500"></canvas>
+        <section id="threejs-container" width="1000" height="1000"></section>
     </main>
     <footer>
         <p>Developed by Inesh Vytheswaran</p>
