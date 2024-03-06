@@ -1,218 +1,152 @@
-// Wait for the HTML document to be fully loaded before executing JavaScript
-document.addEventListener("DOMContentLoaded", function () {
-    // Create a new Three.js scene
+document.addEventListener('DOMContentLoaded', function () {
+    // DOM elements
+    const topHalfCheckbox = document.getElementById('top-half-checkbox');
+    const topHalfSection = document.getElementById('top-half-section');
+    const bottomHalfCheckbox = document.getElementById('bottom-half-checkbox');
+    const bottomHalfSection = document.getElementById('bottom-half-section');
+    
+    // Input fields
+    const topCircumferenceInput = document.getElementById('top-circumference');
+    const topHeightInput = document.getElementById('top-height');
+    const bottomCircumferenceInput = document.getElementById('bottom-circumference');
+    const bottomHeightInput = document.getElementById('bottom-height');
+    const naturalWaistInput = document.getElementById('natural-waist');
+
+    // Event listeners
+    topHalfCheckbox.addEventListener('change', toggleTopHalfSection);
+    bottomHalfCheckbox.addEventListener('change', toggleBottomHalfSection);
+    document.getElementById('download-pattern').addEventListener('click', downloadPattern);
+    topHalfCheckbox.addEventListener('change', draw);
+    bottomHalfCheckbox.addEventListener('change', draw);
+
+
+    // Event listeners for input fields
+    topCircumferenceInput.addEventListener('input', draw);
+    topHeightInput.addEventListener('input', draw);
+    bottomCircumferenceInput.addEventListener('input', draw);
+    bottomHeightInput.addEventListener('input', draw);
+    naturalWaistInput.addEventListener('input', draw);
+
+    // Three.js variables
     const scene = new THREE.Scene();
-
-    const canvas = document.getElementById("trapezoid-canvas");
-    const context = canvas.getContext("2d");
-
-    const circleContainer = document.querySelector('.circle-container');
-    const blackCircle = document.getElementById('black-circle');
-
-    // Calculate the offset of the circle container relative to the viewport
-    const containerRect = circleContainer.getBoundingClientRect();
-    const containerX = containerRect.left + window.scrollX;
-    const containerY = containerRect.top + window.scrollY;
-
-    circleContainer.addEventListener('click', function (event) {
-        const clickX = event.clientX - containerX;
-        const clickY = event.clientY - containerY;
-
-        const centerX = blackCircle.offsetWidth / 2;
-        const centerY = blackCircle.offsetHeight / 2;
-        const radius = blackCircle.offsetWidth / 2;
-
-        // Calculate the angle between the center of the circle and the click point
-        const angle = Math.atan2(clickY - centerY, clickX - centerX);
-
-        // Calculate the coordinates of the point on the perimeter
-        const perimeterX = centerX + radius * Math.cos(angle);
-        const perimeterY = centerY + radius * Math.sin(angle);
-
-        if (event.target.classList.contains('red-dot')) {
-            removeRedDot(event.target);
-        } else {
-            createRedDot(perimeterX, perimeterY);
-        }
-    });
-
-    function createRedDot(x, y) {
-        const redDot = document.createElement('div');
-        redDot.className = 'red-dot';
-        redDot.style.left = x-5  + 'px';
-        redDot.style.top = y-5 + 'px';
-        circleContainer.appendChild(redDot);
-    }
-
-    function removeRedDot(redDot) {
-        circleContainer.removeChild(redDot);
-    }
-
-    function drawSymmetricalTrapezoid(chest, waist, garheight) {
-        const topBase = chest/12; // Chest (inches)
-        const bottomBase = waist/12; // Waist (inches)
-        const height = garheight/10; // Garment height (inches)
-    
-        const halfTopWidth = topBase * 5; // Scale for better visibility
-        const halfBottomWidth = bottomBase * 5; // Scale for better visibility
-    
-        const x1 = (canvas.width - halfTopWidth) / 2;
-        const x2 = (canvas.width + halfTopWidth) / 2;
-        const x3 = (canvas.width - halfBottomWidth) / 2;
-        const x4 = (canvas.width + halfBottomWidth) / 2;
-    
-        const y1 = 0;
-        const y2 = 0;
-        const y3 = height * 10; // Scale for better visibility
-        const y4 = height * 10; // Scale for better visibility
-    
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        scale = 10
-    
-        context.beginPath();
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
-        context.lineTo(x4, y3);
-        context.lineTo(x3, y4);
-        context.closePath();
-        const colorSelector = document.getElementById("color-selector");
-        const selectedColor = colorSelector.options[colorSelector.selectedIndex].value; // Get the selected color value
-    
-        context.fillStyle = "#" + selectedColor; // Set the fill color based on the selected color
-        context.fill();
-        }
-    
-
-    // Create a perspective camera with a 75-degree field of view and an aspect ratio of 1
-    const camera = new THREE.PerspectiveCamera(75, 1);
-
-    // Create a WebGL renderer
     const renderer = new THREE.WebGLRenderer();
-
-    // Set the size of the renderer canvas to 300x300 pixels
-    renderer.setSize(300, 300);
-
-    // Set the background color of the renderer to white
-    renderer.setClearColor(0xffffff);
-
-    // Get the HTML element with the id "threejs-container" to append the renderer canvas to
-    const threejsContainer = document.getElementById("threejs-container");
-    threejsContainer.appendChild(renderer.domElement);
-
-    // Get the color selector input element
-    const colorSelector = document.getElementById("color-selector");
-
-    // Create a basic material with an initial blue color for the truncated cone
+    const camera = new THREE.PerspectiveCamera(75, 1);
     const material = new THREE.MeshBasicMaterial({ color: 0x3498db, side: THREE.DoubleSide });
 
-    // Create a cylinder geometry for the truncated cone
-    const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32, 1);
+    const colorSelector = document.getElementById("color-selector");
 
-    drawSymmetricalTrapezoid(1, 1, 1);
+    colorSelector.addEventListener('change', updateColor);
+    function updateColor() {
+        const selectedColor = colorSelector.value;   
+        // Update material color
+        material.color.setHex(parseInt(selectedColor, 16));
+    }
+    
 
-
-    // Create a mesh (3D object) for the truncated cone using the material and geometry
-    const truncatedCone = new THREE.Mesh(cylinderGeometry, material);
-
-    // Add the truncated cone to the scene
-    scene.add(truncatedCone);
-
-    // Create an edges geometry to represent the wireframe of the truncated cone
-    const wireframeGeometry = new THREE.EdgesGeometry(cylinderGeometry);
-
-    // Create a line material for the wireframe with a black color
     const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
 
-    // Create a line segments object for the wireframe using the geometry and material
-    const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+    // Set up the initial scene
+    initializeScene();
 
-    // Add the wireframe to the scene
-    scene.add(wireframe);
+    // Call the draw function to set up the initial drawing based on checkbox states
+    draw();
 
-    // Create a geometry for the rectangle
-    const rectangleGeometry = new THREE.PlaneGeometry(2, 4);
-
-
-    // Create a mesh for the rectangle using the geometry and material
-    const rectangle = new THREE.Mesh(rectangleGeometry, material);
-
-    // Position the rectangle in front of the cylinder and align its left side with the front side of the cylinder
-    rectangle.position.set(1, 0, 1);
-
-    // Calculate the angle of rotation based on the slope of the cylinder
-    const slope = (truncatedCone.geometry.parameters.radiusTop - truncatedCone.geometry.parameters.radiusBottom) / truncatedCone.geometry.parameters.height;
-    const angle = Math.atan(slope); // Calculate the angle in radians
-
-    // Rotate the rectangle to face towards the user
-    rectangle.rotation.x = angle;
-
-    // Add the rectangle to the scene
-    scene.add(rectangle);
-    const rectWireframeGeometry = new THREE.EdgesGeometry(rectangleGeometry);
-
-    // Create a material for the rectangle wireframe with a black color
-    const rectWireframeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-
-    // Create a line segments object for the rectangle wireframe using the geometry and material
-    const rectWireframe = new THREE.LineSegments(rectWireframeGeometry, rectWireframeMaterial);
-    rectWireframe.position.copy(rectangle.position);
-    rectWireframe.rotation.copy(rectangle.rotation);
-
-    // Add the rectangle wireframe to the scene
-    scene.add(rectWireframe);
-
-    // Set the initial camera position
+    // Function to initialize the Three.js scene
+// Function to initialize the Three.js scene
+function initializeScene() {
+    renderer.setSize(300, 300);
+    renderer.setClearColor(0xffffff);
+    const threejsContainer = document.getElementById("threejs-container");
+    threejsContainer.appendChild(renderer.domElement);
     camera.position.z = 5;
-    camera.position.y = 2; // Adjust the camera's Y position if needed
-    camera.lookAt(0, 0, 0); // Make the camera look at the center of the scene (0, 0, 0)
+    camera.position.y = 2;
+    camera.lookAt(0, 0, 0);
 
-    // Define an animation function
     const animate = () => {
         requestAnimationFrame(animate);
+        // Add rotation to the scene around different axes
+        scene.rotation.y += 0.005; // Rotation around the Y-axis
+        scene.rotation.x += 0.002; // Rotation around the X-axis
+        scene.rotation.z += 0.003; // Rotation around the Z-axis
 
-        // Render the scene with the camera
+
         renderer.render(scene, camera);
     };
-
-    // Start the animation loop
     animate();
+}
+    // Function to redraw the scene based on checkbox states and input values
+    function draw() {
+        console.log('Draw function called');
+        const topCheckboxChecked = topHalfCheckbox.checked;
+        const bottomCheckboxChecked = bottomHalfCheckbox.checked;
 
-    // Function to update the truncated cone based on measurements
-    function updateTruncatedCone(chest, waist, backWaist) {
-        const topRadius = chest / 24;
-        const bottomRadius = waist / 24;
-        const height = backWaist/10;
+        console.log('Top Checkbox Checked:', topCheckboxChecked);
+        console.log('Bottom Checkbox Checked:', bottomCheckboxChecked);
 
-        // Create a new geometry for the truncated cone
-        const newGeometry = new THREE.CylinderGeometry(topRadius, bottomRadius, height, 32, 1);
+        // Clear existing cylinders and wireframes from the scene
+        // Clear existing cylinders and wireframes from the scene
+        while (scene.children.length > 0) {
+            const child = scene.children[0];
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) child.material.dispose();
+            scene.remove(child);
+        }
+        // if (topCheckboxChecked && bottomCheckboxChecked){
+        //     const topCircumference = parseFloat(topCircumferenceInput.value) || 36;
+        //     const topHeight = parseFloat(topHeightInput.value) || 20;
+        //     const midCircumference = parseFloat(naturalWaistInput.value) || 36;
 
-        // Dispose of the old geometry and set the new geometry for the truncated cone
-        truncatedCone.geometry.dispose();
-        truncatedCone.geometry = newGeometry;
+        //     drawCylinder(topCircumference, midCircumference, topHeight, topHeight);
 
-        // Dispose of the old wireframe geometry and set the new wireframe geometry
-        wireframe.geometry.dispose();
-        wireframe.geometry = new THREE.EdgesGeometry(newGeometry);
+        //     const bottomCircumference = parseFloat(bottomCircumferenceInput.value) || 36;
+        //     const bottomHeight = parseFloat(bottomHeightInput.value) || 20;
+
+        //     drawCylinder(midCircumference, bottomCircumference, bottomHeight, -bottomHeight);
+
+        //     drawrectangle(topCircumference, bottomCircumference, topHeight + bottomHeight, ypos = 0)
+        // }
+        // else 
+        if (topCheckboxChecked){
+        // Draw top cylinder if top checkbox is checked
+            const topCircumference = parseFloat(topCircumferenceInput.value) || 36;
+            const topHeight = parseFloat(topHeightInput.value) || 20;
+            const midCircumference = parseFloat(naturalWaistInput.value) || 36;
+
+            drawCylinder(topCircumference, midCircumference, topHeight, topHeight);
+            drawrectangle(topCircumference, midCircumference, topHeight, ypos = topHeight)
+        }
+
+        // Draw bottom cylinder if bottom checkbox is checked
+        if (bottomCheckboxChecked) {
+            const bottomCircumference = parseFloat(bottomCircumferenceInput.value) || 36;
+            const bottomHeight = parseFloat(bottomHeightInput.value) || 20;
+            const midCircumference = parseFloat(naturalWaistInput.value) || 36;
+
+            drawCylinder(midCircumference, bottomCircumference, bottomHeight, -bottomHeight);
+            drawrectangle(midCircumference, bottomCircumference, bottomHeight, ypos = -bottomHeight)
+
+        }
+
+        camera.position.z = 5; // Adjust the camera position
+        renderer.render(scene, camera); // Render the scene with the updated camera position
     }
 
-    // Function to update the rectangle based on measurements
-    function updateRectangle(chest, waist, backWaist) {
+
+    // Function to draw a rectangle with PlaneGeometry
+    function drawrectangle(topCircumference, bottomCircumference, totalHeight, yPos) {
         // Calculate the new position and rotation of the rectangle based on the measurements
-        const topRadius = chest / 24;
-        const bottomRadius = waist / 24;
-        const height = backWaist / 10;
+        const topRadius = topCircumference / 24;
+        const bottomRadius = bottomCircumference / 24;
+        const height = totalHeight / 10;
 
-        const chest2 = chest / 12;
-        const waist2 = waist / 12;
+        const chest2 = topRadius / 12;
+        const waist2 = bottomRadius / 12;
 
+        const newrectangleGeometry = new THREE.PlaneGeometry((chest2+waist2) *2, Math.sqrt(Math.pow(height, 2) + Math.pow((chest2 - waist2), 2)));
+        const rectangle = new THREE.Mesh(newrectangleGeometry, material);
 
-        const newrectangleGeometry = new THREE.PlaneGeometry((chest2+waist2) / 8, Math.sqrt(Math.pow(height, 2) + Math.pow((chest2 - waist2)/2, 2)));
-
-        rectangle.geometry.dispose();
+        rectangle.position.y = rectangle.position.y  + 0.5* height;
         rectangle.geometry = newrectangleGeometry;
-
-
 
         // Calculate the new position of the rectangle along the Z-axis
         const rectangleZPosition = (topRadius+ bottomRadius) / 2;
@@ -229,115 +163,105 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Set the rotation of the rectangle
         rectangle.rotation.x = angle;
+        rectangle.rotation.y +=90;
+
+        rectangle.position.y =  yPos/20
+        scene.add(rectangle);
 
         const newRectWireframeGeometry = new THREE.EdgesGeometry(newrectangleGeometry);
+        const rectwireframe = new THREE.LineSegments(newRectWireframeGeometry, wireframeMaterial);
 
         // Dispose of the old rectangle wireframe geometry and set the new wireframe geometry
-        rectWireframe.geometry.dispose();
-        rectWireframe.geometry = newRectWireframeGeometry;
-        rectWireframe.position.copy(rectangle.position);
-        rectWireframe.rotation.copy(rectangle.rotation);
-    
+        rectwireframe.geometry.dispose();
+        rectwireframe.geometry = newRectWireframeGeometry;
+        rectwireframe.position.copy(rectangle.position);
+        rectwireframe.rotation.copy(rectangle.rotation);
+        //rectwireframe.position.y.copy(rectangle.rotation);
+
+        scene.add(rectwireframe);
+
+        }
+
+    function drawCylinder(topcircumference, bottomCircumference, height, yPos) {
+        const Tradius = topcircumference / 24;
+        const Bradius = bottomCircumference / 24;
+        
+        const geometry = new THREE.CylinderGeometry(Tradius, Bradius, height /10, 32, 1);
+        const cylinder = new THREE.Mesh(geometry, material);
+        cylinder.position.y = yPos/20; // Set the cylinder's y position
+        scene.add(cylinder);
+
+        // Create wireframe for the cylinder
+        const wireframeGeometry = new THREE.EdgesGeometry(geometry);
+        const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+        wireframe.position.y = yPos/20; // Set the wireframe's y position
+        scene.add(wireframe);
     }
 
-    // Initial measurement values
-    const initialChest = 36;
-    const initialWaist = 36;
-    const initialBackWaist = 30;
+    // Function to toggle top-half section visibility
+    function toggleTopHalfSection() {
+        topHalfSection.style.display = topHalfCheckbox.checked ? 'block' : 'none';
+    }
 
-    // Get input elements for chest, waist, and backWaist and set their initial values
-    const chestInput = document.getElementById("chest");
-    chestInput.value = initialChest;
-    const waistInput = document.getElementById("waist");
-    waistInput.value = initialWaist;
-    const backWaistInput = document.getElementById("back-waist");
-    backWaistInput.value = initialBackWaist;
+    // Function to toggle bottom-half section visibility
+    function toggleBottomHalfSection() {
+        bottomHalfSection.style.display = bottomHalfCheckbox.checked ? 'block' : 'none';
+    }
 
-    // Event listener for chest input
-    chestInput.addEventListener("input", function () {
-        // Get the updated chest measurement from the input field
-        const chest = parseFloat(chestInput.value) || 0;
-        // Call the updateTruncatedCone function with the updated measurements
-        updateTruncatedCone(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
+    // Function to handle pattern download
+    function downloadPattern() {
+        let patternText = '';
+        const topCheckboxChecked = topHalfCheckbox.checked;
+        const bottomCheckboxChecked = bottomHalfCheckbox.checked;
 
-        // Call the updateRectangle function with the updated measurements
-        updateRectangle(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
-        drawSymmetricalTrapezoid(chest, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
-
-    });
-
-    // Event listener for waist input
-    waistInput.addEventListener("input", function () {
-        // Get the updated waist measurement from the input field
-        const waist = parseFloat(waistInput.value) || 0;
-        
-        // Call the updateTruncatedCone function with the updated measurements
-        updateTruncatedCone(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
-
-        // Call the updateRectangle function with the updated measurements
-        updateRectangle(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
-        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, waist, parseFloat(backWaistInput.value) || 0);
-
-    });
-
-    // Event listener for backWaist input
-    backWaistInput.addEventListener("input", function () {
-        // Get the updated backWaist measurement from the input field
-        const backWaist = parseFloat(backWaistInput.value) || 0;
-        // Call the updateTruncatedCone function with the updated measurements
-        updateTruncatedCone(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
-
-        // Call the updateRectangle function with the updated measurements
-        updateRectangle(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
-        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, backWaist);
-
-    });
-
-    // Update the truncated cone and rectangle with the initial measurements
-    updateTruncatedCone(initialChest, initialWaist, initialBackWaist);
-    updateRectangle(initialChest, initialWaist, initialBackWaist);
-
-    drawSymmetricalTrapezoid(initialChest, initialWaist, initialBackWaist);
-
-    // Event listener for color selector
-    colorSelector.addEventListener("change", function () {
-        // Get the selected color value from the color selector and set it as the material color
-        const selectedColor = parseInt(colorSelector.value, 16);
-        material.color.set(selectedColor);
-        
-        drawSymmetricalTrapezoid(parseFloat(chestInput.value) || 0, parseFloat(waistInput.value) || 0, parseFloat(backWaistInput.value) || 0);
-
-    });
-
-    // Get the "download-pattern" button
-    const downloadPatternButton = document.getElementById("download-pattern");
-
-    // Event listener for downloading the pattern
-    downloadPatternButton.addEventListener("click", function () {
-        // Get the current measurement values from the input fields
-        const chest = parseFloat(chestInput.value) || 0;
-        const waist = parseFloat(waistInput.value) || 0;
-        const backWaist = parseFloat(backWaistInput.value) || 0;
+        if (topCheckboxChecked) {
+            const topCircumference = parseFloat(topCircumferenceInput.value) || 36;
+            const topHeight = parseFloat(topHeightInput.value) || 20;
+            const midCircumference = parseFloat(naturalWaistInput.value) || 36;
+    
+            patternText += `Top Cylinder Measurements:\n`;
+            patternText += `  Top Circumference: ${topCircumference}\n`;
+            patternText += `  Mid Circumference: ${midCircumference}\n`;
+            patternText += `  Top Height: ${topHeight}\n\n`;
+        }
+    
+        if (bottomCheckboxChecked) {
+            const bottomCircumference = parseFloat(bottomCircumferenceInput.value) || 36;
+            const bottomHeight = parseFloat(bottomHeightInput.value) || 20;
+            const midCircumference = parseFloat(naturalWaistInput.value) || 36;
+    
+            patternText += `Bottom Cylinder Measurements:\n`;
+            patternText += `  Bottom Circumference: ${bottomCircumference}\n`;
+            patternText += `  Mid Circumference: ${midCircumference}\n`;
+            patternText += `  Bottom Height: ${bottomHeight}\n\n`;
+        }
+    
         const colorSelector = document.getElementById("color-selector");
         const selectedColor = colorSelector.options[colorSelector.selectedIndex].value;
     
-        // Create a text pattern with the measurement values and the selected color
-        const patternText = `Measurement Order: Chest - ${chest}, Waist - ${waist}, Back Waist - ${backWaist}, Color - #${selectedColor}`;
+        patternText += `Color: ${selectedColor}\n`;
     
         // Create a Blob containing the text pattern as a text/plain file
         const blob = new Blob([patternText], { type: 'text/plain' });
-
+    
         // Create a URL for the Blob
         const url = window.URL.createObjectURL(blob);
-
+    
         // Create a download link and trigger a click to download the file
         const a = document.createElement('a');
         a.href = url;
         a.download = 'pattern.txt';
         document.body.appendChild(a);
         a.click();
-
+    
         // Revoke the URL to free up resources
         window.URL.revokeObjectURL(url);
-    });
+    }
+    
+    // Get the "download-pattern" button
+    const downloadPatternButton = document.getElementById("download-pattern");
+    downloadPatternButton.addEventListener('click', downloadPattern);
+
+
+
 });
